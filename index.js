@@ -1,4 +1,4 @@
-'use strict';
+
 
 var es = require('event-stream');
 var fs = require('fs');
@@ -8,6 +8,23 @@ var through2 = require('through2');
 var gutil = require('gulp-util');
 var PugInheritance = require('pug-inheritance');
 var PLUGIN_NAME = 'gulp-pug-inheritance';
+
+var GulpPugInheritance = (function() {
+  'use strict';
+  function GulpPugInheritance( options ) {
+    this.options = _.defaults( options, this.DEFAULTS );
+    this.errors  = {};
+    this.files   = [];
+  }
+
+  GulpPugInheritance.DEFAULTS = {
+
+  };
+
+  return GulpPugInheritance;
+})();
+
+
 
 var createPugInheritance = function(file, options) {
   var pugInheritance = null;
