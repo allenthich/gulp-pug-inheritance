@@ -143,6 +143,18 @@ var GulpPugInheritance = (function() {
     }
   };
 
+  GulpPugInheritance.prototype.pipeStream = function() {
+    var _this = this;
+    function writeStream (file) {
+      _this.writeStream(file);
+    }
+    function endStream () {
+      _this.endStream();
+    }
+    this.stream = es.through( writeStream, endStream ) ;
+    return this.stream ;
+  };
+
   return GulpPugInheritance;
 })();
 
