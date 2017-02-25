@@ -115,6 +115,34 @@ var GulpPugInheritance = (function() {
     this.filesPaths = _.union(this.filesPaths, fullpaths);
   };
 
+  GulpPugInheritance.prototype.endStream = function() {
+    if ( this.files.length ) {
+      var _this = this;
+
+      _.forEach( this.files, function( file ) {
+        _this.iterator( file );
+      });
+
+      if ( this.filesPaths.length ) {
+          vfs.src( this.filesPaths, {
+            'base': this.options.basedir
+          }).pipe( es.through(
+            function(f) {
+              _this.stream.emit('data', f);
+            },
+            function() {
+              _this.stream.emit('end');
+            }
+          ));
+      } else {
+        this.stream.emit('end');
+      }
+
+    } else {
+      this.stream.emit('end');
+    }
+  };
+
   return GulpPugInheritance;
 })();
 
