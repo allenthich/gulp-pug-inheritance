@@ -1,5 +1,3 @@
-
-
 var es = require('event-stream');
 var fs = require('fs');
 var path = require('path');
@@ -12,14 +10,25 @@ var PLUGIN_NAME = 'gulp-pug-inheritance';
 
 var GulpPugInheritance = (function() {
   'use strict';
-  function GulpPugInheritance( options ) {
-    this.options = _.defaults( options, this.DEFAULTS );
-    this.errors  = {};
-    this.files   = [];
+
+  function GulpPugInheritance(options) {
+
+    this.options    = _.merge(this.DEFAULTS, options);
+    this.stream     = undefined;
+    this.errors     = {};
+    this.files      = [];
+    this.filesPaths = [];
+
+    if ( this.options.saveInTempFile === true ) {
+      this.tempFile = path.join(process.cwd(), this.options.tempFile);
+      this.tempInheritance = this.getTempFile();
+    }
   }
 
-  GulpPugInheritance.DEFAULTS = {
-
+  GulpPugInheritance.prototype.DEFAULTS = {
+    basedir :         process.cwd(),
+    saveInTempFile:   true,
+    tempFile:         'temp.pugInheritance.json'
   };
 
   return GulpPugInheritance;
