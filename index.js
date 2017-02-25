@@ -2,6 +2,7 @@
 
 var es = require('event-stream');
 var fs = require('fs');
+var path = require('path');
 var _ = require("lodash");
 var vfs = require('vinyl-fs');
 var through2 = require('through2');
