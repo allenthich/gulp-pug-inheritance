@@ -1,6 +1,6 @@
 {
   "name": "gulp-pug-inheritance",
-  "version": "1.0.0beta",
+  "version": "0.2.1",
   "description": "Rebuild only changed jade files and all it dependencies",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pure180/gulp-pug-inheritance/issues"
+    "url": "https://github.com/juanfran/gulp-jade-inheritance/issues"
   },
   "homepage": "https://github.com/pure180/gulp-pug-inheritance",
   "devDependencies": {
