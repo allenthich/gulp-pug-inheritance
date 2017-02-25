@@ -87,6 +87,12 @@ var GulpPugInheritance = (function() {
     return inheritance;
   };
 
+  GulpPugInheritance.prototype.writeStream = function( file ) {
+    if ( file && file.contents.length ) {
+      this.files.push( file );
+    }
+  };
+
   return GulpPugInheritance;
 })();
 
