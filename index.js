@@ -27,7 +27,7 @@ var GulpPugInheritance = (function() {
 
   GulpPugInheritance.prototype.DEFAULTS = {
     basedir :         process.cwd(),
-    saveInTempFile:   true,
+    saveInTempFile:   false,
     tempFile:         'temp.pugInheritance.json'
   };
 
