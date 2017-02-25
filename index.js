@@ -76,6 +76,17 @@ var GulpPugInheritance = (function() {
     return file.relative.replace( /\/|\\|\\\\|\-|\.|\:/g, '_' );
   };
 
+  GulpPugInheritance.prototype.setTempInheritance = function( file ) {
+    var cacheKey = this.setTempKey( file ),
+        inheritance = null;
+
+    inheritance = this.getInheritance( file );
+    this.tempInheritance[cacheKey] = inheritance;
+    fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
+
+    return inheritance;
+  };
+
   return GulpPugInheritance;
 })();
 
