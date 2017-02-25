@@ -72,6 +72,10 @@ var GulpPugInheritance = (function() {
     return require( this.tempFile );
   };
 
+  GulpPugInheritance.prototype.setTempKey = function( file ) {
+    return file.relative.replace( /\/|\\|\\\\|\-|\.|\:/g, '_' );
+  };
+
   return GulpPugInheritance;
 })();
 
