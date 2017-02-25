@@ -93,6 +93,28 @@ var GulpPugInheritance = (function() {
     }
   };
 
+  GulpPugInheritance.prototype.iterator = function( file ) {
+    var cacheKey = this.setTempKey( file ),
+        inheritance = null,
+        _this = this;
+
+    if ( this.options.saveInTempFile === false ) {
+      inheritance = this.getInheritance( file );
+    } else {
+      if ( this.tempInheritance[cacheKey]  === undefined ) {
+        inheritance = this.setTempInheritance( file );
+      } else {
+        inheritance = this.tempInheritance[cacheKey];
+      }
+    }
+
+    var fullpaths = _.map( inheritance.files, function( file ) {
+      return _this.options.basedir + "/" + file;
+    });
+
+    this.filesPaths = _.union(this.filesPaths, fullpaths);
+  };
+
   return GulpPugInheritance;
 })();
 
