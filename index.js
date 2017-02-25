@@ -62,6 +62,16 @@ var GulpPugInheritance = (function() {
     this.stream.emit( "error", err );
   };
 
+  GulpPugInheritance.prototype.getTempFile = function() {
+    try {
+      fs.existsSync( this.tempFile );
+    } catch ( error ) {
+      this.throwError( error );
+      return;
+    }
+    return require( this.tempFile );
+  };
+
   return GulpPugInheritance;
 })();
 
