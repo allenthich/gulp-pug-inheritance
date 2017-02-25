@@ -31,6 +31,17 @@ var GulpPugInheritance = (function() {
     tempFile:         'temp.pugInheritance.json'
   };
 
+  GulpPugInheritance.prototype.getInheritance = function( file ) {
+    var inheritance = null;
+    try {
+      inheritance = new PugInheritance( file.path, this.options.basedir, this.options );
+    } catch ( error ) {
+      this.throwError( error );
+      return;
+    }
+    return inheritance;
+  };
+
   return GulpPugInheritance;
 })();
 
