@@ -42,6 +42,26 @@ var GulpPugInheritance = (function() {
     return inheritance;
   };
 
+  GulpPugInheritance.prototype.throwError = function( error ) {
+    var alreadyShown,
+        _this = this;
+    if ( this.errors[error.message] ) {
+      alreadyShown = true;
+    }
+
+    clearTimeout( this.errors[error.message] );
+    this.errors[error.message] = setTimeout( function() {
+      delete _this.errors[error.message];
+    }, 500 ); //debounce
+
+    if ( alreadyShown ) {
+      return;
+    }
+
+    var err = new gutil.PluginError( PLUGIN_NAME, error );
+    this.stream.emit( "error", err );
+  };
+
   return GulpPugInheritance;
 })();
 
