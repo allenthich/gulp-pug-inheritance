@@ -6,10 +6,6 @@ var expect = chai.expect;
 var gutil = require('gulp-util');
 var fs = require('fs');
 
-// var proxyquire = require('proxyquire');
-// var sinon = require('sinon');
-// var gutil = require('gulp-util');
-
 var getFixtureFile = function (path) {
   return new gutil.File({
     path: './test/fixtures/' + path,
