@@ -65,12 +65,10 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getTempFile = function() {
-    try {
-      fs.existsSync( this.tempFile );
-    } catch ( error ) {
-      this.throwError( error );
-      return;
+    if ( !fs.existsSync( this.tempFile ) ) {
+      fs.writeFileSync(this.tempFile, JSON.stringify({}, null, 2), 'utf-8');
     }
+
     return require( this.tempFile );
   };
 
