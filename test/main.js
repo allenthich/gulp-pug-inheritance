@@ -84,6 +84,27 @@ describe('gulp-pug-inheritance', function(done) {
     stream.end();
   });
 
+  it('subfolder pug', function(done) {
+    var fixture = getFixtureFile('subfolder/fixture5.pug');
+
+    var files = [];
+
+    var stream = plugin({basedir: 'test/fixtures', extension: '.pug'});
+    stream
+      .on('data', function (file) {
+        expect(file.base).to.be.eql('test/fixtures');
+        files.push(file);
+      })
+      .once('end', function() {
+        expect(files).to.have.length(1);
+
+        done();
+      });
+
+    stream.write(fixture);
+    stream.end();
+  });
+
   describe('custom basedir', function(done) {
     it('wrong path', function(done) {
       var fixture = getFixtureFile('fixture1.pug');
@@ -126,24 +147,43 @@ describe('gulp-pug-inheritance', function(done) {
     });
   });
 
-  it('subfolder pug', function(done) {
-    var fixture = getFixtureFile('subfolder/fixture5.pug');
+  describe('Use temporary file', function(done) {
+    it('Save inheritance to temporary file as object', function(done){
+      var fixtureName = 'fixture1.pug';
+      var fixture = getFixtureFile(fixtureName);
 
-    var files = [];
+      var fileNames = [
+        path.join('test', 'fixtures', 'fixture1.pug'),
+        path.join('test', 'fixtures', 'fixture2.pug'),
+        path.join('test', 'fixtures', 'fixture3.pug'),
+      ];
 
-    var stream = plugin({basedir: 'test/fixtures', extension: '.pug'});
-    stream
-      .on('data', function (file) {
-        expect(file.base).to.be.eql('test/fixtures');
-        files.push(file);
-      })
-      .once('end', function() {
-        expect(files).to.have.length(1);
+      var temporaryFile = path.join(process.cwd(), 'temp.pugInheritance.json');
+      var temporaryKey  = 'fixture1.pug'.replace( /\/|\\|\\\\|\-|\.|\:/g, '_' );
+      var files = [];
 
-        done();
-      });
+      var stream = plugin({basedir: 'test/fixtures', saveInTempFile: true});
 
-    stream.write(fixture);
-    stream.end();
+      stream
+        .on('data', function (file) {
+          files.push(file);
+        })
+        .once('end', function() {
+          expect(files).to.have.length(3);
+
+          if (fs.existsSync( temporaryFile )) {
+            var inheritance = require( temporaryFile );
+            expect(inheritance).to.be.a('object');
+            expect(inheritance[temporaryKey].files).to.have.length(files.length);
+          }
+          done();
+          if (fs.existsSync( temporaryFile )) {
+            fs.unlinkSync(temporaryFile);
+          }
+        });
+
+      stream.write(fixture);
+      stream.end();
+    });
   });
 });
