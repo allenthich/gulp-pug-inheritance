@@ -17,7 +17,9 @@ var GulpPugInheritance = (function() {
     this.stream     = undefined;
     this.errors     = {};
     this.files      = [];
+    this.newFiles   = {};
     this.filesPaths = [];
+    this.firstRun   = false;
 
     if ( this.options.saveInTempFile === true ) {
       this.tempFile = path.join(process.cwd(), this.options.tempFile);
@@ -67,6 +69,7 @@ var GulpPugInheritance = (function() {
   GulpPugInheritance.prototype.getTempFile = function() {
     if ( !fs.existsSync( this.tempFile ) ) {
       fs.writeFileSync(this.tempFile, JSON.stringify({}, null, 2), 'utf-8');
+      this.firstRun = true;
     }
 
     return require( this.tempFile );
@@ -84,6 +87,42 @@ var GulpPugInheritance = (function() {
     this.tempInheritance[cacheKey] = inheritance;
     fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
 
+    if ( this.firstRun === false ) {
+      /*
+        Tempfile allready exist so we guess there are allready inheritances
+        We will save them i a seperate object
+      */
+      this.newFiles[cacheKey] = {
+        files:  inheritance.files,
+        file:   file
+      };
+    }
+
+
+    return inheritance;
+  };
+
+  GulpPugInheritance.prototype.resolveInheritance = function( file ) {
+    var cacheKey = this.setTempKey( file ),
+        inheritance = null,
+        _this = this,
+        date = Date.now(),
+        state = null;
+
+    if ( this.options.saveInTempFile === false ) {
+      inheritance = this.getInheritance( file );
+    } else {
+      if ( this.tempInheritance[cacheKey]  === undefined ) {
+        state = 'NEW';
+        inheritance = this.setTempInheritance( file );
+      } else {
+        inheritance = this.tempInheritance[cacheKey];
+        state = 'CACHED';
+      }
+    }
+    var timeElapsed = (Date.now() - date);
+    console.log('[' + PLUGIN_NAME + '][' + state + '] Get inheritance of: "' + file.relative + '" - ' + timeElapsed + 'ms');
+
     return inheritance;
   };
 
@@ -93,34 +132,26 @@ var GulpPugInheritance = (function() {
     }
   };
 
-  GulpPugInheritance.prototype.iterator = function( file ) {
-    var cacheKey = this.setTempKey( file ),
-        inheritance = null,
-        _this = this;
-
-    if ( this.options.saveInTempFile === false ) {
-      inheritance = this.getInheritance( file );
-    } else {
-      if ( this.tempInheritance[cacheKey]  === undefined ) {
-        inheritance = this.setTempInheritance( file );
-      } else {
-        inheritance = this.tempInheritance[cacheKey];
-      }
-    }
-
-    var fullpaths = _.map( inheritance.files, function( file ) {
-      return _this.options.basedir + "/" + file;
-    });
-
-    this.filesPaths = _.union(this.filesPaths, fullpaths);
-  };
-
   GulpPugInheritance.prototype.endStream = function() {
     if ( this.files.length ) {
       var _this = this;
 
+      if ( this.options.saveInTempFile === true ) {
+        if ( this.firstRun === true ) {
+          console.log('[' + PLUGIN_NAME + '] Plugin started for the first time. Save inheritances to a tempfile');
+        } else {
+          console.log('[' + PLUGIN_NAME + '] Plugin already started once. Get inheritances from a tempfile');
+        }
+      }
+
       _.forEach( this.files, function( file ) {
-        _this.iterator( file );
+        var inheritance = _this.resolveInheritance( file );
+
+        var fullpaths = _.map( inheritance.files, function( file ) {
+          return path.join(_this.options.basedir, file);
+        });
+
+        _this.filesPaths = _.union(_this.filesPaths, fullpaths);
       });
 
       if ( this.filesPaths.length ) {
