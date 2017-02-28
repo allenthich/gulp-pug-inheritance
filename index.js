@@ -8,7 +8,6 @@ var gutil = require('gulp-util');
 var PugInheritance = require('pug-inheritance');
 var PLUGIN_NAME = 'gulp-pug-inheritance';
 
-
 var pugLex = require('pug-lexer');
 var pugParser = require('pug-parser');
 var pugWalk = require('pug-walk');
@@ -22,7 +21,6 @@ var GulpPugInheritance = (function() {
     this.stream     = undefined;
     this.errors     = {};
     this.files      = [];
-    this.newFiles   = {};
     this.filesPaths = [];
     this.firstRun   = false;
 
@@ -113,14 +111,6 @@ var GulpPugInheritance = (function() {
     fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
 
     if ( this.firstRun === false ) {
-      /*
-        Tempfile allready exist so we guess there are allready inheritances
-        We will save them i a seperate object
-      */
-      this.newFiles[cacheKey] = {
-        files:  inheritance.files,
-        file:   file
-      };
     }
 
     return inheritance;
