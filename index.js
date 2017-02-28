@@ -103,6 +103,14 @@ var GulpPugInheritance = (function() {
     return dependencies;
   };
 
+  GulpPugInheritance.prototype.updateTempInheritance = function( dependency ) {
+    var cacheKey = this.setTempKey( dependency );
+    var pathToFile = path.join( process.cwd(), this.options.basedir, path.normalize( dependency ) );
+    if ( this.tempInheritance[cacheKey] ) {
+      this.tempInheritance[cacheKey] = this.getInheritance( pathToFile );
+    }
+  };
+
   GulpPugInheritance.prototype.setTempInheritance = function( file ) {
     var _this = this,
         cacheKey = this.setTempKey( file.relative ),
@@ -113,6 +121,11 @@ var GulpPugInheritance = (function() {
     this.tempInheritance[cacheKey].file = file.relative;
 
     if ( this.firstRun === false ) {
+      if (this.tempInheritance[cacheKey].dependencies.length > 0) {
+        _.forEach(this.tempInheritance[cacheKey].dependencies, function(dependency) {
+          _this.updateTempInheritance(dependency);
+        });
+      }
     }
 
     fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
