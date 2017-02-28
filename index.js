@@ -83,18 +83,20 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file ) {
-    var dependencies = [],
-        contents = fs.readFileSync(file.path, 'utf8'),
-        lex = pugLex(contents, {
-          filename: file.relative
-        });
+    var _this         = this,
+        dependencies  = [],
+        contents      = fs.readFileSync(file.path, 'utf8'),
+        dirname       = path.dirname(file.relative),
+        lex           = pugLex(contents, {
+                        filename: file.relative
+                      });
 
     var parse = pugParser(lex);
     var walk  = pugWalk(parse, function(node){
-
       if ( node.type === 'Include' || node.type === 'Extends' ) {
-        if ( _.indexOf( dependencies, node.file.path ) === -1 ) {
-          dependencies.push( node.file.path );
+        var pathToDependencie =path.join(dirname, node.file.path );
+        if ( _.indexOf( dependencies, pathToDependencie ) === -1 ) {
+          dependencies.push( pathToDependencie );
         }
       }
     });
@@ -102,16 +104,18 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.setTempInheritance = function( file ) {
-    var cacheKey = this.setTempKey( file ),
-        inheritance = null;
+    var _this = this,
+        cacheKey = this.setTempKey( file.relative ),
+        inheritance =  this.getInheritance( file.path );
 
-    inheritance = this.getInheritance( file );
     this.tempInheritance[cacheKey] = inheritance;
     this.tempInheritance[cacheKey].dependencies = this.getDependencies(file);
-    fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
+    this.tempInheritance[cacheKey].file = file.relative;
 
     if ( this.firstRun === false ) {
     }
+
+    fs.writeFileSync( this.tempFile, JSON.stringify(this.tempInheritance, null, 2), 'utf-8' );
 
     return inheritance;
   };
