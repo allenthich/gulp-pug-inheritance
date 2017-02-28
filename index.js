@@ -38,10 +38,10 @@ var GulpPugInheritance = (function() {
     tempFile:         'temp.pugInheritance.json'
   };
 
-  GulpPugInheritance.prototype.getInheritance = function( file ) {
+  GulpPugInheritance.prototype.getInheritance = function( path ) {
     var inheritance = null;
     try {
-      inheritance = new PugInheritance( file.path, this.options.basedir, this.options );
+      inheritance = new PugInheritance( path, this.options.basedir, this.options );
     } catch ( error ) {
       this.throwError( error );
       return;
@@ -78,8 +78,8 @@ var GulpPugInheritance = (function() {
     return require( this.tempFile );
   };
 
-  GulpPugInheritance.prototype.setTempKey = function( file ) {
-    return file.relative.replace( /\/|\\|\\\\|\-|\.|\:/g, '_' );
+  GulpPugInheritance.prototype.setTempKey = function( path ) {
+    return path.replace( /\/|\\|\\\\|\-|\.|\:/g, '_' );
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file ) {
@@ -117,14 +117,14 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.resolveInheritance = function( file ) {
-    var cacheKey = this.setTempKey( file ),
+    var cacheKey = this.setTempKey( file.relative ),
         inheritance = null,
         _this = this,
         date = Date.now(),
         state = null;
 
     if ( this.options.saveInTempFile === false ) {
-      inheritance = this.getInheritance( file );
+      inheritance = this.getInheritance( file.path );
     } else {
       if ( this.tempInheritance[cacheKey]  === undefined ) {
         state = 'NEW';
