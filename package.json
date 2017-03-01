@@ -39,7 +39,10 @@
     "pug-inheritance": "^2.0.0",
     "lodash": "^4.16.4",
     "through2": "^2.0.1",
-    "vinyl-fs": "^2.4.3"
+    "vinyl-fs": "^2.4.3",
+    "pug-lexer": "^3.0.0",
+    "pug-parser": "^2.0.2",
+    "pug-walk": "^1.1.1"
   },
   "skipInheritances": [
     "node_modules"
