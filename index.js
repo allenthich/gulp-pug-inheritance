@@ -157,8 +157,13 @@ var GulpPugInheritance = (function() {
         state = 'NEW';
         inheritance = this.setTempInheritance( file );
       } else {
-        inheritance = this.tempInheritance[cacheKey];
         state = 'CACHED';
+        if ( this.getDependencies( file ).length === this.tempInheritance[cacheKey].dependencies.length ) {
+          inheritance = this.tempInheritance[cacheKey];
+        } else {
+          this.tempInheritance[cacheKey] = undefined;
+          inheritance = this.setTempInheritance( file );
+        }
       }
     }
     var timeElapsed = (Date.now() - date);
@@ -218,11 +223,13 @@ var GulpPugInheritance = (function() {
     if ( this.options.saveInTempFile === true ) {
       if ( _.size(this.tempInheritance) > 0 ) {
         _.forEach( this.tempInheritance, function( tempInheritance ) {
-          var cacheKey = _this.setTempKey( tempInheritance.file );
-          var baseDir = path.join( process.cwd(), _this.options.basedir, tempInheritance.file );
-          if ( !fs.existsSync( baseDir ) ) {
-            _this.updateDependencies( tempInheritance.dependencies );
-            _this.tempInheritance[cacheKey] = undefined;
+          if (tempInheritance !== undefined) {
+            var cacheKey = _this.setTempKey( tempInheritance.file );
+            var baseDir = path.join( process.cwd(), _this.options.basedir, tempInheritance.file );
+            if ( !fs.existsSync( baseDir ) ) {
+              _this.updateDependencies( tempInheritance.dependencies );
+              _this.tempInheritance[cacheKey] = undefined;
+            }
           }
         });
       }
