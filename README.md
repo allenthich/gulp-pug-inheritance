@@ -14,8 +14,8 @@ Inspired by [pug-inheritance](https://github.com/adammockor/pug-inheritance)
 * [Usage](#usage)
 * [Large Pug-Applikation](#large-pug-applikation)
 * [Only process changed files](#only-process-changed-files)
-* [Options / Defaults](#options-defaults)
-* [jade >= 1.11](#jade-1-11)
+* [Options / Defaults](#options--defaults)
+* [jade >= 1.11](#jade--111)
 
 ## Install
 
