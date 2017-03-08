@@ -6,11 +6,8 @@ var vfs = require('vinyl-fs');
 var through2 = require('through2');
 var gutil = require('gulp-util');
 var PugInheritance = require('pug-inheritance');
+var pugDependency = require('pug-dependency');
 var PLUGIN_NAME = 'gulp-pug-inheritance';
-
-var pugLex = require('pug-lexer');
-var pugParser = require('pug-parser');
-var pugWalk = require('pug-walk');
 
 var GulpPugInheritance = (function() {
   'use strict';
@@ -83,26 +80,19 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file, pathToFile ) {
-    var _this         = this,
-        dependencies  = [],
-        fileRelative  = ( typeof file === 'object' ) ? file.relative : file,
-        filePath      = ( typeof file === 'object' ) ? file.path : pathToFile,
-        contents      = ( fs.existsSync(filePath) ) ? fs.readFileSync( filePath, 'utf8' ) : false,
-        dirname       = path.dirname( fileRelative );
+    var _this           = this,
+        glob            = path.join( this.options.basedir, '**', '*' + this.options.extension ),
+        getDependencies = pugDependency( glob ),
+        filePath        = ( typeof file === 'object' ) ? file.path : pathToFile,
+        dependencies    = [];
 
-    if ( contents === false ) {return;}
-    var lex           = pugLex(contents, {
-                        filename: fileRelative
-                      }),
-        parse = pugParser( lex );
-    var walk  = pugWalk( parse, function( node ){
-      if ( node.type === 'Include' || node.type === 'Extends' ) {
-        var pathToDependencie =path.join( dirname, node.file.path );
-        if ( _.indexOf( dependencies, pathToDependencie ) === -1 ) {
-          dependencies.push( pathToDependencie );
-        }
+    _.forEach( getDependencies.find_dependencies( filePath ), function( dependency ) {
+      var pathToDependencie = path.relative( _this.options.basedir, dependency );
+      if ( _.indexOf( dependencies, pathToDependencie ) === -1 ) {
+        dependencies.push( pathToDependencie );
       }
     });
+
     return dependencies;
   };
 

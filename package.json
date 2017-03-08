@@ -18,7 +18,7 @@
     "pug-inheritance"
   ],
   "author": "Juanfran Alcántara",
-  "maintainers" : [
+  "maintainers": [
     "Daniel Pfisterer <info@daniel-pfisterer.de>"
   ],
   "license": "MIT",
@@ -36,13 +36,11 @@
   "dependencies": {
     "event-stream": "^3.3.4",
     "gulp-util": "^3.0.7",
-    "pug-inheritance": "^2.0.2",
     "lodash": "^4.16.4",
+    "pug-dependency": "^1.0.1",
+    "pug-inheritance": "^2.0.2",
     "through2": "^2.0.1",
-    "vinyl-fs": "^2.4.3",
-    "pug-lexer": "^3.0.0",
-    "pug-parser": "^2.0.2",
-    "pug-walk": "^1.1.1"
+    "vinyl-fs": "^2.4.3"
   },
   "skipInheritances": [
     "node_modules"
