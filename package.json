@@ -1,6 +1,6 @@
 {
   "name": "gulp-pug-inheritance",
-  "version": "1.0.0beta9",
+  "version": "1.0.0beta10",
   "description": "Rebuild only changed jade files and all it dependencies",
   "main": "index.js",
   "scripts": {
