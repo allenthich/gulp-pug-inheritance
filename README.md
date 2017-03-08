@@ -20,7 +20,7 @@ Inspired by [pug-inheritance](https://github.com/adammockor/pug-inheritance)
 ## Install
 
 ```shell
-npm install gulp-pug-inheritance@1.0.0-beta8 --save-dev
+npm install gulp-pug-inheritance@1.0.0-beta9 --save-dev
 ```
 
 ## Usage
@@ -113,7 +113,7 @@ If you want to prevent partials from being processed, mark them with an undersco
 To install all that's need for it:
 
 ```shell
-npm install gulp-pug-inheritance@1.0.0-beta8 gulp-pug gulp-changed gulp-cached gulp-if gulp-filter --save-dev
+npm install gulp-pug-inheritance@1.0.0-beta9 gulp-pug gulp-changed gulp-cached gulp-if gulp-filter --save-dev
 ```
 You can find a working example in this test repository: [gulp-pug-inheritance-test](https://github.com/pure180/gulp-pug-inheritance-test).
 
