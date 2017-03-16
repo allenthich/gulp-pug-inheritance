@@ -136,6 +136,7 @@ GulpPugInheritance.prototype.DEFAULTS = {
 | `skip` | `string` or `array` | `'node_modules'` | If you are using the root folder  `options.basedir = '.'` to process your *.pug files, you have to skip node_modules. Because of dependant PUG-packages which may contain test files, that may cause errors during the compile. This option accepts a string or an array. |
 | `saveInTempFile` | `boolean` | `false` | If you want to save the inheritance tree in to a temporary file, you should set this option to `true`. **Recommended for larger build applikations with +50 files.** |
 | `tempFile` | `string` | `temp.pugInheritance.json` | Path and name of the file for the temporary inheritance tree. |
+| `debug` | `boolean` | `false` | Enable logs to displays them in Terminal. |
 
 
 ### jade >= 1.11
