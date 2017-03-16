@@ -20,7 +20,7 @@ Inspired by [pug-inheritance](https://github.com/adammockor/pug-inheritance)
 ## Install
 
 ```shell
-npm install gulp-pug-inheritance@1.0.0-beta10 --save-dev
+npm install gulp-pug-inheritance@1.0.0-rc1 --save-dev
 ```
 
 ## Usage

@@ -81,11 +81,9 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file, pathToFile ) {
-    var dependencies  = [],
-        filePath      = ( typeof file === 'object' ) ? file.path : pathToFile;
-
+    var filePath      = ( typeof file === 'object' ) ? file.path : pathToFile;
     var pugDependencies = new PugDependencies( path.relative ( process.cwd(), filePath ) );
-    return ( dependencies = pugDependencies.dependencies );
+    return pugDependencies;
   };
 
   GulpPugInheritance.prototype.updateTempInheritance = function( dependency ) {
