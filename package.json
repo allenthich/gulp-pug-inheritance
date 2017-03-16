@@ -37,7 +37,7 @@
     "event-stream": "^3.3.4",
     "gulp-util": "^3.0.7",
     "lodash": "^4.16.4",
-    "pug-dependency": "^1.0.1",
+    "pug-dependencies": "^1.0.0",
     "pug-inheritance": "^2.0.2",
     "through2": "^2.0.1",
     "vinyl-fs": "^2.4.3"

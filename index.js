@@ -80,20 +80,11 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file, pathToFile ) {
-    var _this           = this,
-        glob            = path.join( this.options.basedir, '**', '*' + this.options.extension ),
-        getDependencies = pugDependency( glob ),
-        filePath        = ( typeof file === 'object' ) ? file.path : pathToFile,
-        dependencies    = [];
+    var dependencies  = [],
+        filePath      = ( typeof file === 'object' ) ? file.path : pathToFile;
 
-    _.forEach( getDependencies.find_dependencies( filePath ), function( dependency ) {
-      var pathToDependencie = path.relative( _this.options.basedir, dependency );
-      if ( _.indexOf( dependencies, pathToDependencie ) === -1 ) {
-        dependencies.push( pathToDependencie );
-      }
-    });
-
-    return dependencies;
+    var pugDependencies = new PugDependencies( path.relative ( process.cwd(), filePath ) );
+    return ( dependencies = pugDependencies.dependencies );
   };
 
   GulpPugInheritance.prototype.updateTempInheritance = function( dependency ) {
