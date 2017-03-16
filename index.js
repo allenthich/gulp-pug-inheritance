@@ -32,7 +32,8 @@ var GulpPugInheritance = (function() {
     extension:        '.pug',
     skip:             'node_modules',
     saveInTempFile:   false,
-    tempFile:         'temp.pugInheritance.json'
+    tempFile:         'temp.pugInheritance.json',
+    debug:            false
   };
 
   GulpPugInheritance.prototype.getInheritance = function( path ) {
@@ -135,20 +136,24 @@ var GulpPugInheritance = (function() {
       inheritance = this.getInheritance( file.path );
     } else {
       if ( this.tempInheritance[cacheKey]  === undefined ) {
-        state = 'NEW';
+        if ( this.options.debug ) { state = 'NEW'; }
         inheritance = this.setTempInheritance( file );
       } else {
-        state = 'CACHED';
+
         if ( this.getDependencies( file ).length === this.tempInheritance[cacheKey].dependencies.length ) {
+          if ( this.options.debug ) { state = 'CACHED'; }
           inheritance = this.tempInheritance[cacheKey];
         } else {
+          if ( this.options.debug ) { state = 'RECACHE'; }
           this.tempInheritance[cacheKey] = undefined;
           inheritance = this.setTempInheritance( file );
         }
       }
     }
-    var timeElapsed = (Date.now() - date);
-    // console.log('[' + PLUGIN_NAME + '][' + state + '] Get inheritance of: "' + file.relative + '" - ' + timeElapsed + 'ms');
+    if ( this.options.debug ) {
+      var timeElapsed = (Date.now() - date);
+      gutil.log('[' + PLUGIN_NAME + '][' + state + '] Get inheritance of: "' + file.relative + '" - ' + timeElapsed + 'ms');
+    }
 
     return inheritance;
   };
@@ -162,16 +167,15 @@ var GulpPugInheritance = (function() {
   GulpPugInheritance.prototype.endStream = function() {
     var _this = this;
     if ( this.files.length ) {
-
-      /*
-      if ( this.options.saveInTempFile === true ) {
-        if ( this.firstRun === true ) {
-          console.log('[' + PLUGIN_NAME + '] Plugin started for the first time. Save inheritances to a tempfile');
-        } else {
-          console.log('[' + PLUGIN_NAME + '] Plugin already started once. Get inheritances from a tempfile');
+      if ( this.options.debug ) {
+        if ( this.options.saveInTempFile === true ) {
+          if ( this.firstRun === true ) {
+            gutil.log('[' + PLUGIN_NAME + '] Plugin started for the first time. Save inheritances to a tempfile');
+          } else {
+            gutil.log('[' + PLUGIN_NAME + '] Plugin already started once. Get inheritances from a tempfile');
+          }
         }
       }
-      */
 
       _.forEach( this.files, function( file ) {
         var inheritance = _this.resolveInheritance( file );
@@ -208,6 +212,9 @@ var GulpPugInheritance = (function() {
             var cacheKey = _this.setTempKey( tempInheritance.file );
             var baseDir = path.join( process.cwd(), _this.options.basedir, tempInheritance.file );
             if ( !fs.existsSync( baseDir ) ) {
+              if ( this.options.debug ) {
+                gutil.log('[' + PLUGIN_NAME + '][DELETE] Delete inheritance of: "' + tempInheritance.file + '"');
+              }
               _this.updateDependencies( tempInheritance.dependencies );
               _this.tempInheritance[cacheKey] = undefined;
             }
