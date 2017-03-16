@@ -6,7 +6,7 @@ var vfs = require('vinyl-fs');
 var through2 = require('through2');
 var gutil = require('gulp-util');
 var PugInheritance = require('pug-inheritance');
-var pugDependency = require('pug-dependency');
+var PugDependencies = require('pug-dependencies');
 var PLUGIN_NAME = 'gulp-pug-inheritance';
 
 var GulpPugInheritance = (function() {
