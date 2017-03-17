@@ -5,6 +5,7 @@ var _ = require("lodash");
 var vfs = require('vinyl-fs');
 var through2 = require('through2');
 var gutil = require('gulp-util');
+var difference = require('array-difference');
 var PugInheritance = require('pug-inheritance');
 var PugDependencies = require('pug-dependencies');
 var PLUGIN_NAME = 'gulp-pug-inheritance';
@@ -83,7 +84,12 @@ var GulpPugInheritance = (function() {
   GulpPugInheritance.prototype.getDependencies = function( file, pathToFile ) {
     var filePath      = ( typeof file === 'object' ) ? file.path : pathToFile;
     var pugDependencies = new PugDependencies( path.relative ( process.cwd(), filePath ) );
-    return pugDependencies;
+    var dependencies = [];
+    var fileRelative = path.join( process.cwd(), this.options.basedir );
+    _.forEach( pugDependencies, function( dependency ){
+      dependencies.push( path.relative( fileRelative, dependency ) );
+    });
+    return dependencies;
   };
 
   GulpPugInheritance.prototype.updateTempInheritance = function( dependency ) {
@@ -131,20 +137,25 @@ var GulpPugInheritance = (function() {
         state = null;
 
     if ( this.options.saveInTempFile === false ) {
+      if ( this.options.debug ) { state = 'DEFAULT'; }
       inheritance = this.getInheritance( file.path );
     } else {
       if ( this.tempInheritance[cacheKey]  === undefined ) {
         if ( this.options.debug ) { state = 'NEW'; }
         inheritance = this.setTempInheritance( file );
       } else {
+        var newDependencies = this.getDependencies( file );
+        var oldDependencies = this.tempInheritance[cacheKey].dependencies;
+        var diff = difference(newDependencies, oldDependencies);
 
-        if ( this.getDependencies( file ).length === this.tempInheritance[cacheKey].dependencies.length ) {
+        if ( newDependencies.length === oldDependencies.length ) {
           if ( this.options.debug ) { state = 'CACHED'; }
           inheritance = this.tempInheritance[cacheKey];
         } else {
           if ( this.options.debug ) { state = 'RECACHE'; }
           this.tempInheritance[cacheKey] = undefined;
           inheritance = this.setTempInheritance( file );
+          this.updateDependencies(diff);
         }
       }
     }
