@@ -82,10 +82,11 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.getDependencies = function( file, pathToFile ) {
-    var filePath      = ( typeof file === 'object' ) ? file.path : pathToFile;
-    var pugDependencies = new PugDependencies( path.relative ( process.cwd(), filePath ) );
-    var dependencies = [];
-    var fileRelative = path.join( process.cwd(), this.options.basedir );
+    var filePath         = ( typeof file === 'object' ) ? file.path : pathToFile,
+        pugDependencies = new PugDependencies( path.relative ( process.cwd(), filePath ) ),
+        dependencies    = [],
+        fileRelative    = path.join( process.cwd(), this.options.basedir );
+
     _.forEach( pugDependencies, function( dependency ){
       dependencies.push( path.relative( fileRelative, dependency ) );
     });
@@ -96,6 +97,11 @@ var GulpPugInheritance = (function() {
     var cacheKey = this.setTempKey( dependency );
     var pathToFile = path.join( process.cwd(), this.options.basedir, path.normalize( dependency ) );
     if ( this.tempInheritance[cacheKey] ) {
+
+      if ( this.options.debug ) {
+        gutil.log('[' + PLUGIN_NAME + '][Update] Get new inheritance of: "' + dependency + '"');
+      }
+
       this.tempInheritance[cacheKey] = {};
       this.tempInheritance[cacheKey] = this.getInheritance( pathToFile );
       this.tempInheritance[cacheKey].dependencies = this.getDependencies( dependency, pathToFile );
@@ -113,9 +119,9 @@ var GulpPugInheritance = (function() {
   };
 
   GulpPugInheritance.prototype.setTempInheritance = function( file ) {
-    var _this = this,
-        cacheKey = this.setTempKey( file.relative ),
-        inheritance =  this.getInheritance( file.path );
+    var _this         = this,
+        cacheKey      = this.setTempKey( file.relative ),
+        inheritance   = this.getInheritance( file.path );
 
     this.tempInheritance[cacheKey] = {};
     this.tempInheritance[cacheKey] = inheritance;
@@ -153,8 +159,9 @@ var GulpPugInheritance = (function() {
           inheritance = this.tempInheritance[cacheKey];
         } else {
           if ( this.options.debug ) { state = 'RECACHE'; }
-          this.tempInheritance[cacheKey] = undefined;
-          inheritance = this.setTempInheritance( file );
+          this.tempInheritance[cacheKey].dependencies = undefined;
+          this.tempInheritance[cacheKey].dependencies = newDependencies;
+          inheritance = this.tempInheritance[cacheKey];
           this.updateDependencies(diff);
         }
       }
