@@ -1,6 +1,6 @@
 {
   "name": "gulp-pug-inheritance",
-  "version": "1.0.0rc.3",
+  "version": "1.0.0rc.4",
   "description": "Rebuild only changed jade files and all it dependencies",
   "main": "index.js",
   "scripts": {
@@ -38,7 +38,7 @@
     "event-stream": "^3.3.4",
     "gulp-util": "^3.0.7",
     "lodash": "^4.16.4",
-    "pug-dependencies": "^1.0.3",
+    "pug-dependencies": "^1.0.2",
     "pug-inheritance": "^2.0.2",
     "through2": "^2.0.1",
     "vinyl-fs": "^2.4.3"
