@@ -1,95 +1,93 @@
-This is fork of [Juanfran's](https://github.com/juanfran) [gulp-jade-inheritance](https://github.com/juanfran/gulp-jade-inheritance) gulp-plugin migrated to new Pug parser (former Jade).
+# @allenthich/gulp-pug-inheritance
 
----
-#gulp-pug-inheritance
-[![Build Status](https://travis-ci.org/pure180/gulp-pug-inheritance.svg?branch=master)](https://travis-ci.org/pure180/gulp-pug-inheritance)
-[![Dependency Status](https://david-dm.org/pure180/gulp-jade-inheritance.svg)](https://david-dm.org/pure180/gulp-jade-inheritance)
-> Rebuild a jade file with other files that have extended or included those file
+> Compile pug files with files that have included it.
+> 
+> Gulp-pug's pug-load should handle included pug files.
 
-Inspired by [jade-inheritance](https://github.com/paulyoung/jade-inheritance)
+Forked from pure180's [gulp-pug-inheritance](https://github.com/pure180/gulp-pug-inheritance).
 
-## Install
+This version reimplements [pug-inheritance](https://github.com/adammockor/pug-inheritance)'s O(n<sup>2</sup>) dependency traversal by storing dependencies as a directed graph for O(v) lookup performance.
+
+## Installation
 
 ```shell
-npm install gulp-pug-inheritance --save-dev
+$ npm install @allenthich/gulp-pug-inheritance --save-dev
 ```
 
 ## Usage
+This example highlights processing changed source files and compiling their affected parent dependencies. This is helpful when pug compilation is used in a gulp watch task and only one pug source file hass changed. The plugin on `firstCompile` creates a directed graph of dependencies based on the provided `basedir` directory. It is important to note that dependencies are processed and compiled bottom-up from the changed pug file to their parent dependencies. This allows caching in later steps of the pipeline e.g. `gulp-pug`, `pug-load`.
 
-`gulpfile.js`
-```js
-var pugInheritance = require('gulp-pug-inheritance');
-var jade = require('gulp-pug');
-
-gulp.task('jade-inheritance', function() {
-  gulp.src('/jade/example.jade')
-    .pipe(pugInheritance({basedir: '/jade/'}))
-    .pipe(jade());
-});
-```
-
-In this example jade compile `example.jade` and all other files that have been extended or included `example.jade`. The plugin searches for those dependencies in the `basedir` directory.
-
-### Only process changed files
-
-You can use `gulp-pug-inheritance` with `gulp-changed` and `gulp-cached` to only process the files that have changed. This also prevent partials from being processed separately by marking them with an underscore before their name.
 
 ```js
 'use strict';
 var gulp = require('gulp');
 var pugInheritance = require('gulp-pug-inheritance');
-var jade = require('gulp-jade');
+var pug = require('gulp-pug');
 var changed = require('gulp-changed');
-var cached = require('gulp-cached');
 var gulpif = require('gulp-if');
-var filter = require('gulp-filter');
+var through2 = require('through2');
 
-gulp.task('jade', function() {
-    return gulp.src('app/**/*.jade')
+// Pug source file modified timestamps
+var pugSrcModifiedTs = {}
+var pugBaseDir = path.resolve(process.cwd(), '/src/')
+var firstCompile = true
 
-        //only pass unchanged *main* files and *all* the partials
-        .pipe(changed('dist', {extension: '.html'}))
+/**
+ * Compare file in stream against cached timestamp
+ * @override
+ * @param {Stream} stream
+ * @param {Vinyl} streamingFile
+ */
+async function compareLastModifiedTime (stream, streamingFile) {
+  var filePath = path.join(pugBaseDir, streamingFile.relative)
+  var cachedTs = pugSrcModifiedTs[filePath]
 
-        //filter out unchanged partials, but it only works when watching
-        .pipe(gulpif(global.isWatching, cached('jade')))
+  if (streamingFile.stat && Math.floor(streamingFile.stat.mtimeMs) > Math.floor(cachedTs)) {
+    console.log('Detected modified file: ', filePath)
+    stream.push(streamingFile);
+  }
+}
 
-        //find files that depend on the files that have changed
-        .pipe(pugInheritance({basedir: 'app'}))
+/**
+ * Store modified timestamps to determine whether a file has changed
+ */
+function cacheModifiedTimestamp () {
+  return through2.obj(function (file, enc, cb) {
+    var filePath = path.join(pugBaseDir, file.relative)
 
-        //filter out partials (folders and files starting with "_" )
-        .pipe(filter(function (file) {
-            return !/\/_/.test(file.path) && !/^_/.test(file.relative);
-        }))
+    // Get latest timestamp from file in stream
+    var latestModifiedFileTs = file.stat && Math.floor(file.stat.mtimeMs)
+    pugSrcModifiedTs[filePath] = latestModifiedFileTs
 
-        //process jade templates
-        .pipe(jade())
+    cb(null, file)
+  })
+}
 
-        //save all the files
+gulp.task('pug', function() {
+    return gulp.src('src/**/*.pug')
+
+        // Process all files on the first compile, otherwise process changed source files
+        .pipe(gulpif(!firstCompile, changed('DEST_NOT_REQ', { extension: '.pug', hasChanged: compareLastModifiedTime })))
+
+        // Track source file changes
+        .pipe(cacheModifiedTimestamp())
+
+        // For eligible files in the stream, find files that depend on the files that have changed
+        .pipe(pugInheritance({ basedir: 'src', skip: 'node_modules' }))
+
+        // Process pug files that have changed
+        .pipe(pug())
+
+        // Save HTML
         .pipe(gulp.dest('dist'));
 });
-gulp.task('setWatch', function() {
-    global.isWatching = true;
-});
-gulp.task('watch', ['setWatch', 'jade'], function() {
-    //your watch functions...
-});
 ```
 
-If you want to prevent partials from being processed, mark them with an underscore before their name or their parent folder's name. Example structure:
-
 ```
-/app/index.jade
-/app/_header.jade
-/app/_partials/article.jade
+/src/layout.pug
+/src/sub-layout1.pug
+/src/sub-layout2.pug
+/src/mixins/article.pug
+/src/mixins/table.pug
 /dist/
 ```
-
-To install all that's need for it:
-
-```shell
-npm install gulp-pug-inheritance gulp-pug gulp-changed gulp-cached gulp-if gulp-filter --save-dev
-```
-
-### jade >= 1.11
-
-if your using jade 1.11 add `"jade": "^1.11.0"` to your `package.json` to overwrite the jade-inheritance version. [Issue](https://github.com/paulyoung/jade-inheritance/issues/15)
