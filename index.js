@@ -308,11 +308,11 @@ function gulpPugInheritance (options) {
           var pugFileInheritance = aggregateInheritanceTypes(pugInheritanceTokens, currentFilePath)
 
           // Add inheritance to high-level dependency graph
-          // addEdgesToDownwardDependencyGraph(pugFileInheritance)
+          addEdgesToDownwardDependencyGraph(pugFileInheritance)
           addEdgesToUpwardDependencyGraph(pugFileInheritance)
         } else {
           // Add unconnected vertex to dependency graph
-          // downwardDependencyGraph.addVertex(currentFilePath, null)
+          downwardDependencyGraph.addVertex(currentFilePath, null)
           upwardDependencyGraph.addVertex(currentFilePath, null)
 
           if (DEBUG) {
@@ -356,11 +356,18 @@ function gulpPugInheritance (options) {
       // Reverse order of compilation so that the changed file can be cache on pug-load level
       _.reverse(dependencies)
 
+      // Prioritize dependency nodes that don't have child dependencies with changed file as highest priority
+      const orderedDependencies = _.sortBy(dependencies, [function (dep) {
+        // Reorder changed file to front
+        if (dep === dependencies[0]) { return -1 }
+        return _.get(downwardDependencyGraph, '_edges').get(dep).size
+      }])
+
       // info('dependencies:', dependencies)
 
       // Pipe dependency files into stream
-      if (dependencies.length) {
-        vfs.src(dependencies)
+      if (orderedDependencies.length) {
+        vfs.src(orderedDependencies)
           .pipe(es.through(
             function (f) {
               stream.emit('data', f)
